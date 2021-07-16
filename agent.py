@@ -1,9 +1,10 @@
 import torch
 from random import sample, randint
 import numpy as np
-
 from collections import deque
+
 from snake_game_rl import SnakeGameRL, Direction, Coord, BLOCK_SIZE
+from model import Linear_Qnet, Trainer
 
 # need to get state where we are aware of the current environment: state=get_state(game)
 # calculate the next move from the state: action = get_move(state) ,model.predict()
@@ -21,10 +22,13 @@ class Agent:
     def __init__(self):
         self.num_games = 0
         self.epsilon = 0 # to control randomness
-        self.gamma = 0
+        self.gamma = 0.9
         self.memory = deque(maxlen=MAX_CACHE) # popleft()
-        self.model = None
-        self.trainer = None
+        # self.model = None
+        # self.trainer = None
+        # create instances of model and trainer
+        self.model = Linear_Qnet(11, 256, 3)
+        self.trainer = Trainer(self.model, lr=LR, gamma=self.gamma)
 
     def get_state(self, game):
         head = game.snake[0]
@@ -94,7 +98,7 @@ class Agent:
     def train_short_memory(self, state, action, reward , next_state, done):
         self.trainer.train_step(state, action, reward, next_state, done)
 
-    def get_action(self):
+    def get_action(self, state):
         # random moves: tradeoff exploration / explotation
         self.epsilon = 80 - self.num_games
         final_move = []
@@ -103,7 +107,7 @@ class Agent:
             final_move[move] = 1
         else:
             state0 = torch.tensor(state, dtype=torch.float)
-            prediction = self.model.predict(state0)
+            prediction = self.model(state0)
             move = torch.argmax(prediction).item()
             final_move[move] = 1
         return final_move
