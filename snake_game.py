@@ -12,6 +12,8 @@ pg.init()
 font = pg.font.SysFont('arial', 25)
 
 
+
+
 class Direction(Enum):
     RIGHT = 1
     LEFT = 2
@@ -20,13 +22,9 @@ class Direction(Enum):
 
 
 
-Coord = namedtuple('Coordinates','x,y')
-
+Coord = namedtuple('Coord','x,y')
 BLOCK_SIZE = 20
-SPEED = 20
-
-
-
+SPEED = 2
 # rgb colors
 WHITE = (255,255,255)
 RED = (255,0,0)
@@ -41,7 +39,7 @@ class SnakeGame:
         self.w = w
         self.h = h
         self.display = pg.display.set_mode((self.w, self.h))
-        pg.display.set_caption('Snake')
+        pg.display.set_caption('Snake Game')
         self.clock = pg.time.Clock()
 
         self.direction = Direction.RIGHT
@@ -49,7 +47,7 @@ class SnakeGame:
         self.head = Coord(self.w/2, self.h/2)
         self.snake = [self.head,
                       Coord(self.head.x-BLOCK_SIZE, self.head.y),
-                      Coord(self.head.x-2*BLOCK_SIZE, self.head.y)]
+                      Coord(self.head.x-(2*BLOCK_SIZE), self.head.y)]
 
 
 
@@ -83,13 +81,13 @@ class SnakeGame:
                 quit()
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_LEFT:
-                    self.direction == Direction.LEFT
+                    self.direction = Direction.LEFT
                 elif event.key == pg.K_RIGHT:
-                    self.direction == Direction.RIGHT
+                    self.direction = Direction.RIGHT
                 elif event.key == pg.K_UP:
-                    self.direction == Direction.K_UP
+                    self.direction = Direction.UP
                 elif event.key == pg.K_DOWN:
-                    self.direction == Direction.K_DOWN
+                    self.direction = Direction.DOWN
         # move
         # update the head
         self._move(self.direction)
@@ -118,16 +116,16 @@ class SnakeGame:
     def _update_ui(self):
         self.display.fill(BLACK)
 
-        for point in self.snake:
+        for p in self.snake:
             #draw snake
-            pg.draw.rect(self.display, BLUE, pg.Rect(point.x,point.y, BLOCK_SIZE, BLOCK_SIZE))
-            pg.draw.rect(self.display, GREEN, pg.Rect(point.x+4,point.y+4, 12, 12))
+            pg.draw.rect(self.display, BLUE, pg.Rect(p.x, p.y, BLOCK_SIZE, BLOCK_SIZE))
+            pg.draw.rect(self.display, GREEN, pg.Rect(p.x+1, p.y+1, 12, 12))
 
         # draw food
         pg.draw.rect(self.display, RED, pg.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
 
         text = font.render(f"Score: {self.score}", True, WHITE)
-        self.display.blit(self, [0,0])
+        self.display.blit(text, [0,0])
         pg.display.flip()
 
 
@@ -142,24 +140,24 @@ class SnakeGame:
             return True
         return False
 
-    def _move(self,direction):
-        y = self.head.x
-        x = self.head.y
+    def _move(self, direction):
+        x = self.head.x
+        y = self.head.y
         if direction == Direction.RIGHT:
             x += BLOCK_SIZE
         elif direction == Direction.LEFT:
             x -= BLOCK_SIZE
         elif direction == Direction.DOWN:
-            x += BLOCK_SIZE
+            y += BLOCK_SIZE
         elif direction == Direction.UP:
-            x -= BLOCK_SIZE
+            y -= BLOCK_SIZE
 
-        self.head = Coord(x,y)
-
-
+        self.head = Coord(x, y)
 
 
-if __name__ == "main":
+
+
+if __name__ == "__main__":
     game = SnakeGame()
     # game run
     while True:
